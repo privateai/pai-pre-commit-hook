@@ -1,0 +1,9 @@
+- id: pii-check
+  exclude: (pii-check-hook.py | README.md)
+  name: Check for PII
+  description: this hook checks if modified files have PII and marks it.
+  entry: pii_check --url URL --enabled-entities ENABLED_ENTITIES
+  pass_filenames: false
+  additional_dependencies: ["requests"]
+  verbose: true
+  language: python
