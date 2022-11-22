@@ -4,6 +4,8 @@ import sys
 import argparse
 import os
 from requests.exceptions import HTTPError
+from dotenv import load_dotenv
+from pathlib import Path
 
 
 def get_payload(content, enabled_entity_list):
@@ -109,8 +111,6 @@ def check_for_pii(url, api_key, enabled_entity_list):
 
     pii_result = get_response_from_api(content, url, api_key, enabled_entity_list)
 
-    detected_pii = False
-
     msg = []
     checked = []
     flagged_line = False
@@ -119,7 +119,6 @@ def check_for_pii(url, api_key, enabled_entity_list):
         if not item["pii_present"]:
             continue
         for pii_dict in item["pii"]:
-            detected_pii = True
             line, file = locate_pii_in_files(content, files, checked, pii_dict)
             checked.append((pii_dict["stt_idx"], pii_dict["end_idx"], line, file))
             if check_whether_flagged_line(line, flagged):
@@ -129,7 +128,7 @@ def check_for_pii(url, api_key, enabled_entity_list):
                 f"index: {pii_dict['end_idx'] + 1} "
             )
 
-    if not detected_pii:
+    if not msg:
         print("No PII present :)")
     else:
         sys.exit("\n".join(msg))
@@ -138,19 +137,20 @@ def check_for_pii(url, api_key, enabled_entity_list):
 def main():
     parser = argparse.ArgumentParser(description="pre-commit hook to check for PII")
     parser.add_argument("--url", type=str, required=True)
+    parser.add_argument("--env-file-path", type=str, required=True)
     parser.add_argument("--enabled-entities", type=str, nargs="+")
     args = parser.parse_args()
+
+    dotenv_path = Path(args.env_file_path)
+    load_dotenv(dotenv_path=dotenv_path)
+
+    API_KEY = os.getenv("API_KEY")
 
     enabled_entity_list = (
         [item.upper() for item in args.enabled_entities]
         if args.enabled_entities
         else []
     )
-
-    # this is temporary, as we will need not need the API_KEY anyway after the licensing changes are merged.
-    with open(".env") as e:
-        line = e.readlines()
-        API_KEY = line[0][8:21]
 
     check_for_pii(args.url, API_KEY, enabled_entity_list)
 
