@@ -10,7 +10,6 @@ setup(
     author="Private AI",
     description=DESCRIPTION,
     packages=find_packages(),
-    install_requires=["pre-commit==2.20.0", "requests==2.28.1"],
     keywords=["python", "pre-commit"],
     entry_points={"console_scripts": ["pii_check=pii_check.pii_check_hook:main"]},
 )
