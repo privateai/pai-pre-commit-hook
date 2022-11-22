@@ -141,10 +141,10 @@ def main():
     parser.add_argument("--enabled-entities", type=str, nargs="+")
     args = parser.parse_args()
 
-    dotenv_path = Path(args.env_file_path)
+    dotenv_path = Path(os.environ["PWD"], args.env_file_path)
     load_dotenv(dotenv_path=dotenv_path)
 
-    API_KEY = os.getenv("API_KEY")
+    API_KEY = os.environ["API_KEY"]
 
     enabled_entity_list = (
         [item.upper() for item in args.enabled_entities]
