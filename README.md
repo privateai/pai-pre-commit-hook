@@ -8,7 +8,7 @@ A pre-commit hook to check for PII in your code.
 2. Run 'pre-commit install' from inside the git repo where you want to use this hook.
 3. Create a file called '.pre-commit-config.yaml' and add the following code to it:
 
-<pre>
+```
 repos:
   - repo: https://github.com/ketaki99/test-pre-commit
     rev: test.4
@@ -18,10 +18,10 @@ repos:
         description: this hook checks if staged files have PII and marks it.
         entry: pii_check --url URL --env-file-path ENV_FILE_PATH  --enabled-entities ENABLED_ENTITIES
         pass_filenames: false
-        additional_dependencies: ["requests", "python-dotenv", "pathlib2"]
+        additional_dependencies: ["requests", "python-dotenv"]
         verbose: true
         language: python
-</pre>
+```
 
 4. Replace 'URL' with the url of where your container is hosted.\
    eg. http://localhost:8080/v3/process_text
