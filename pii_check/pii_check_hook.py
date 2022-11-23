@@ -144,7 +144,10 @@ def main():
     dotenv_path = Path(os.environ["PWD"], args.env_file_path)
     load_dotenv(dotenv_path=dotenv_path)
 
-    API_KEY = os.environ["API_KEY"]
+    if "API_KEY" in os.environ:
+        API_KEY = os.environ["API_KEY"]
+    else:
+        sys.exit("Your .env file is missing or does not contain API_KEY")
 
     enabled_entity_list = (
         [item.upper() for item in args.enabled_entities]
