@@ -11,7 +11,6 @@ setup(
     description=DESCRIPTION,
     packages=find_packages(),
     install_requires=[
-        "pre-commit==2.20.0",
         "requests==2.28.1",
         "python-dotenv==0.19.0",
     ],
