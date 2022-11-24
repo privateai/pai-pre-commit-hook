@@ -124,6 +124,7 @@ def check_for_pii(url, api_key, enabled_entity_list):
             for item in flagged:
                 if line > item[0] and line < item[1] and file == item[2]:
                     skip = True
+                    break
             if skip == False:
                 msg.append(
                     f"PII found - type: {pii_dict['best_label']}, line number: {line}, file: {file}, start index: {pii_dict['stt_idx'] + 1}, end "
