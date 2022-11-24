@@ -19,7 +19,6 @@ repos:
         entry: pii_check --url URL --env-file-path ENV_FILE_PATH  --enabled-entities ENABLED_ENTITIES
         pass_filenames: false
         verbose: true
-        language: python
 ```
 4. Run 'pre-commit install' from inside the git repo where you want to use this hook.
 5. Replace 'URL' with the url of where your container is hosted.\
