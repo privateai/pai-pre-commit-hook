@@ -11,14 +11,23 @@ A pre-commit hook to check for PII in your code. The hook will run every time yo
 ```
 repos:
   - repo: https://github.com/ketaki99/test-pre-commit
-    rev: test.5
+    rev: test.6
     hooks:
       - id: pii-check
         name: Check for PII
-        description: this hook checks if staged files have PII and marks it.
-        entry: pii_check --url URL --env-file-path ENV_FILE_PATH  --enabled-entities ENABLED_ENTITIES
-        pass_filenames: false
+        entry: pii_check
+        args:
+          [
+            "--url",
+            "URL",
+            "--env-file-path",
+            "ENV_FILE_PATH",
+            "--enabled_entities",
+            "ENTITY-1",
+            "ENTITY-2",
+          ]
         verbose: true
+
 ```
 4. Run 'pre-commit install' from inside the git repo where you want to use this hook.
 5. Replace 'URL' with the url of where your container is hosted.\
@@ -26,9 +35,9 @@ repos:
 6. Create a .env file and add your API_KEY like so:\
     API_KEY=`<put your API KEY here>`
 7. Replace 'ENV_FILE_PATH' with the path to your .env file.
-8. If you wish to add the optional argument --enabled-entities replace 'ENABLED_ENTITIES' with the entities you wish to mark as PII, separated with a space. 
+8. If you wish to add the optional argument --enabled-entities replace 'ENTITY-1', 'ENTITY-2' with the entities you wish to mark as PII
     (Recommended to add this argument currently)\
-    e.g PASSWORD ORGANIZATION.\
+    You may add any entities from the following list: https://docs.private-ai.com/entities/
    If you choose to keep this blank, all entities will be enabled by default. 
 9. The pre-commit hook will skip the check for blocks that start with "PII_CHECK: OFF" and end with "PII_CHECK: ON"
 
