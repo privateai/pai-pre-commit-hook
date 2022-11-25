@@ -21,7 +21,7 @@ repos:
             "URL",
             "--env-file-path",
             "ENV_FILE_PATH",
-            "--enabled_entities",
+            "--enabled-entities",
             "ENTITY-1",
             "ENTITY-2",
           ]
