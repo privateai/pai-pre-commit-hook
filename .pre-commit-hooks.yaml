@@ -1,7 +1,13 @@
 - id: pii-check
   name: Check for PII
   description: this hook checks if modified files have PII and marks it.
-  entry: pii_check --url URL --env-file-path ENV_FILE_PATH --enabled-entities ENABLED_ENTITIES
+  entry: pii_check
+  args:
+    [
+      --url=URL,
+      --env-file-path=ENV_FILE_PATH,
+      --enabled-entities=ENABLED_ENTITIES,
+    ]
   pass_filenames: false
   verbose: true
   language: python
