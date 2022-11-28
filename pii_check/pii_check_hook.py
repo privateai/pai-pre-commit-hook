@@ -36,21 +36,21 @@ def get_flagged_lines(files):
                 start_flag = False
                 for number, line in enumerate(lines, 1):
                     if (
-                        line.replace(" ", "").strip() == "#PII_CHECK:OFF"
+                        "PII_CHECK:OFF" in line.replace(" ", "").strip()
                         and not start_flag
                     ):
                         start = number
                         start_flag = True
-                    if line.replace(" ", "").strip() == "#PII_CHECK:ON" and start_flag:
+                    if "PII_CHECK:ON" in line.replace(" ", "").strip() and start_flag:
                         end = number
                         start_flag = False
-                        flagged.append((start, end))
+                        flagged.append((start, end, file))
     return flagged
 
 
-def check_whether_flagged_line(line, flagged):
+def check_whether_flagged_line(line, flagged, file):
     for item in flagged:
-        if line > item[0] and line < item[1]:
+        if line > item[0] and line < item[1] and item[2] == file:
             return True
         else:
             return False
@@ -113,7 +113,6 @@ def check_for_pii(url, api_key, enabled_entity_list):
 
     msg = []
     checked = []
-    flagged_line = False
 
     for content, item in zip(content, pii_result):
         if not item["pii_present"]:
@@ -121,12 +120,16 @@ def check_for_pii(url, api_key, enabled_entity_list):
         for pii_dict in item["pii"]:
             line, file = locate_pii_in_files(content, files, checked, pii_dict)
             checked.append((pii_dict["stt_idx"], pii_dict["end_idx"], line, file))
-            if check_whether_flagged_line(line, flagged):
-                continue
-            msg.append(
-                f"PII found - type: {pii_dict['best_label']}, line number: {line}, file: {file}, start index: {pii_dict['stt_idx'] + 1}, end "
-                f"index: {pii_dict['end_idx'] + 1} "
-            )
+            skip = False
+            for item in flagged:
+                if line > item[0] and line < item[1] and file == item[2]:
+                    skip = True
+                    break
+            if skip == False:
+                msg.append(
+                    f"PII found - type: {pii_dict['best_label']}, line number: {line}, file: {file}, start index: {pii_dict['stt_idx'] + 1}, end "
+                    f"index: {pii_dict['end_idx'] + 1} "
+                )
 
     if not msg:
         print("No PII present :)")
