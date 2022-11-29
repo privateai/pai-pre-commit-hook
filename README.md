@@ -14,7 +14,6 @@ repos:
     rev: test.6
     hooks:
       - id: pii-check
-        entry: pii_check
         args:
           [
             "--url",
