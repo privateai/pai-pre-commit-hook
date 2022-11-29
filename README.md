@@ -2,7 +2,14 @@
 
 A pre-commit hook to check for PII in your code. The hook is configured in each repository you would like to scan for PII and runs automatically every time you commit to your repo. It will check for PII in all staged files.
 
-Note that PII detection isn't done locally, instead any files part of the commit are sent via a POST request, either to a self-hosted instance of Private AI's PII detection container, or Private AI's cloud endpoint.
+Note that PII detection isn't done locally, instead any files part of the commit are sent via a POST request, either to a self-hosted instance of Private AI's PII detection container, or Private AI's cloud endpoint. 
+
+This integration only works with the 3.0 version of Private AI's container.
+
+
+## Prerequisites
+
+This integration requires an endpoint to make requests against. For instructions, please see the [installation guide](https://docs.private-ai.com/installation/). 
 
 ## Installation 
 
@@ -16,7 +23,6 @@ repos:
     rev: test.6
     hooks:
       - id: pii-check
-        entry: pii_check
         args:
           [
             "--url",
@@ -32,7 +38,7 @@ repos:
 ```
 4. Run 'pre-commit install' from inside the git repo where you want to use this hook.
 5. Replace 'URL' with the url of where your container is hosted.\
-   eg. http://localhost:8080/v3/process_text
+     eg. http://localhost:8080/v3/process_text for a container running locally or https://api.private-ai.com/deid/v3/process_text for Private AI's cloud endpoint.
 6. Create a .env file and add your API_KEY like so:\
     API_KEY=`<put your API KEY here>`
 7. Replace 'ENV_FILE_PATH' with the path to your .env file.
@@ -40,7 +46,8 @@ repos:
     (Recommended to add this argument currently)\
     You may add any entities from the following list: https://docs.private-ai.com/entities/ 
    If you choose not to provide this option, all entities will be enabled by default. 
-
+  
+  
 That's it! You're all set for safe commits!
 
 ## Sample Project 
