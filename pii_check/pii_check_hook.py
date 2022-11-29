@@ -150,7 +150,7 @@ def main():
     if "API_KEY" in os.environ:
         API_KEY = os.environ["API_KEY"]
     else:
-        sys.exit(".env file is missing or does not contain API_KEY")
+        sys.exit("Your .env file is missing or does not contain API_KEY")
 
     enabled_entity_list = (
         [item.upper() for item in args.enabled_entities]
