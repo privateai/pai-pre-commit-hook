@@ -20,7 +20,7 @@ This integration requires an endpoint to make requests against. For instructions
 ```
 repos:
   - repo: https://github.com/ketaki99/test-pre-commit
-    rev: test.6
+    rev: test.8
     hooks:
       - id: pii-check
         args:
