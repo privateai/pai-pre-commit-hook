@@ -11,17 +11,17 @@ from pathlib import Path
 def get_payload(content, enabled_entity_list):
     if len(enabled_entity_list) == 0:
         payload = {
-            "text": content,
-            "pii_detection": {
+            "text": ["hello John"],
+            "entity_detection": {
                 "accuracy": "high",
             },
         }
     else:
         payload = {
-            "text": content,
-            "pii_detection": {
+            "text": ["hello John"],
+            "entity_detection": {
                 "accuracy": "high",
-                "entity_types": [{"type": "enable", "value": enabled_entity_list}],
+                "entity_types": [{"type": "ENABLE", "value": enabled_entity_list}],
             },
         }
     return payload
@@ -115,9 +115,9 @@ def check_for_pii(url, api_key, enabled_entity_list):
     checked = []
 
     for content, item in zip(content, pii_result):
-        if not item["pii_present"]:
+        if not item["entities_present"]:
             continue
-        for pii_dict in item["pii"]:
+        for pii_dict in item["entities"]:
             line, file = locate_pii_in_files(content, files, checked, pii_dict)
             checked.append((pii_dict["stt_idx"], pii_dict["end_idx"], line, file))
             skip = False
