@@ -11,14 +11,14 @@ from pathlib import Path
 def get_payload(content, enabled_entity_list):
     if len(enabled_entity_list) == 0:
         payload = {
-            "text": ["hello John"],
+            "text": content,
             "entity_detection": {
                 "accuracy": "high",
             },
         }
     else:
         payload = {
-            "text": ["hello John"],
+            "text": content,
             "entity_detection": {
                 "accuracy": "high",
                 "entity_types": [{"type": "ENABLE", "value": enabled_entity_list}],
