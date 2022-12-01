@@ -19,8 +19,8 @@ This integration requires an endpoint to make requests against. For instructions
 
 ```
 repos:
-  - repo: https://github.com/ketaki99/test-pre-commit
-    rev: test.8
+  - repo: https://github.com/privateai/pai-pre-commit-hook.git
+    rev: v1.0-beta
     hooks:
       - id: pii-check
         args:
