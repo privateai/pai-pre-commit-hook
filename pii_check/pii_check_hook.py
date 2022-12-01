@@ -12,6 +12,7 @@ def get_payload(content, enabled_entity_list):
     if len(enabled_entity_list) == 0:
         payload = {
             "text": content,
+            "link_batch": True,
             "entity_detection": {
                 "accuracy": "high",
             },
@@ -19,6 +20,7 @@ def get_payload(content, enabled_entity_list):
     else:
         payload = {
             "text": content,
+            "link_batch": True,
             "entity_detection": {
                 "accuracy": "high",
                 "entity_types": [{"type": "ENABLE", "value": enabled_entity_list}],
@@ -46,14 +48,6 @@ def get_flagged_lines(files):
                         start_flag = False
                         flagged.append((start, end, file))
     return flagged
-
-
-def check_whether_flagged_line(line, flagged, file):
-    for item in flagged:
-        if line > item[0] and line < item[1] and item[2] == file:
-            return True
-        else:
-            return False
 
 
 def get_response_from_api(content, url, api_key, enabled_entity_list):
