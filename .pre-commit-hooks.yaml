@@ -1,0 +1,7 @@
+- id: pii-check
+  name: Check for PII
+  description: this hook checks if modified files have PII and marks it.
+  entry: pii_check
+  pass_filenames: false
+  verbose: true
+  language: python
