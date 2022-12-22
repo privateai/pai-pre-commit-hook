@@ -8,19 +8,6 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 
-def get_payload(content, enabled_entity_list):
-    # basically will get rid of if and set enabled_entity_list to list of whatever entity values are decided
-    payload = {
-        "text": content,
-        "link_batch": True,
-        "entity_detection": {
-            "accuracy": "high",
-            "entity_types": [{"type": "ENABLE", "value": enabled_entity_list}],
-        },
-    }
-    return payload
-
-
 def get_flagged_lines(files):
     flagged = []
     for file in files:
