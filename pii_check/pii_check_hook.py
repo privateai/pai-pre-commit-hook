@@ -9,23 +9,15 @@ from pathlib import Path
 
 
 def get_payload(content, enabled_entity_list):
-    if len(enabled_entity_list) == 0:
-        payload = {
-            "text": content,
-            "link_batch": True,
-            "entity_detection": {
-                "accuracy": "high",
-            },
-        }
-    else:
-        payload = {
-            "text": content,
-            "link_batch": True,
-            "entity_detection": {
-                "accuracy": "high",
-                "entity_types": [{"type": "ENABLE", "value": enabled_entity_list}],
-            },
-        }
+    # basically will get rid of if and set enabled_entity_list to list of whatever entity values are decided
+    payload = {
+        "text": content,
+        "link_batch": True,
+        "entity_detection": {
+            "accuracy": "high",
+            "entity_types": [{"type": "ENABLE", "value": enabled_entity_list}],
+        },
+    }
     return payload
 
 
@@ -51,7 +43,14 @@ def get_flagged_lines(files):
 
 
 def get_response_from_api(content, url, api_key, enabled_entity_list):
-    payload = get_payload(content, enabled_entity_list)
+    payload = {
+        "text": content,
+        "link_batch": True,
+        "entity_detection": {
+            "accuracy": "high",
+            "entity_types": [{"type": "ENABLE", "value": enabled_entity_list}],
+        },
+    }
     headers = {"Content-Type": "application/json", "X-API-KEY": api_key}
 
     try:
@@ -149,7 +148,14 @@ def main():
     enabled_entity_list = (
         [item.upper() for item in args.enabled_entities]
         if args.enabled_entities
-        else []
+        else [
+            "PASSWORD",
+            "BANK_ACCOUNT",
+            "CREDIT_CARD",
+            "CREDIT_CARD_EXPIRATION",
+            "CVV",
+            "ROUTING_NUMBER",
+        ]
     )
 
     check_for_pii(args.url, API_KEY, enabled_entity_list)
