@@ -121,7 +121,19 @@ def main():
     parser = argparse.ArgumentParser(description="pre-commit hook to check for PII")
     parser.add_argument("--url", type=str, required=True)
     parser.add_argument("--env-file-path", type=str, required=True)
-    parser.add_argument("--enabled-entities", type=str, nargs="+")
+    parser.add_argument(
+        "--enabled-entities",
+        type=str,
+        nargs="+",
+        default=[
+            "PASSWORD",
+            "BANK_ACCOUNT",
+            "CREDIT_CARD",
+            "CREDIT_CARD_EXPIRATION",
+            "CVV",
+            "ROUTING_NUMBER",
+        ],
+    )
     args = parser.parse_args()
 
     dotenv_path = Path(os.environ["PWD"], args.env_file_path)
@@ -132,18 +144,7 @@ def main():
     else:
         sys.exit("Your .env file is missing or does not contain API_KEY")
 
-    enabled_entity_list = (
-        [item.upper() for item in args.enabled_entities]
-        if args.enabled_entities
-        else [
-            "PASSWORD",
-            "BANK_ACCOUNT",
-            "CREDIT_CARD",
-            "CREDIT_CARD_EXPIRATION",
-            "CVV",
-            "ROUTING_NUMBER",
-        ]
-    )
+    enabled_entity_list = [item.upper() for item in args.enabled_entities]
 
     check_for_pii(args.url, API_KEY, enabled_entity_list)
 
