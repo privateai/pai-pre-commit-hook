@@ -8,6 +8,19 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 
+def get_payload(content, enabled_entity_list):
+    payload = {
+        "text": content,
+        "link_batch": True,
+        "entity_detection": {
+            "accuracy": "high",
+            "entity_types": [{"type": "ENABLE", "value": enabled_entity_list}],
+        },
+    }
+
+    return payload
+
+
 def get_flagged_lines(files):
     flagged = []
     for file in files:
@@ -30,14 +43,7 @@ def get_flagged_lines(files):
 
 
 def get_response_from_api(content, url, api_key, enabled_entity_list):
-    payload = {
-        "text": content,
-        "link_batch": True,
-        "entity_detection": {
-            "accuracy": "high",
-            "entity_types": [{"type": "ENABLE", "value": enabled_entity_list}],
-        },
-    }
+    payload = get_payload(content, enabled_entity_list)
     headers = {"Content-Type": "application/json", "X-API-KEY": api_key}
 
     try:
@@ -142,7 +148,9 @@ def main():
     if "API_KEY" in os.environ:
         API_KEY = os.environ["API_KEY"]
     else:
-        sys.exit("Your .env file is missing or does not contain API_KEY")
+        sys.exit(
+            "Your .env file is missing from the provided path or does not contain API_KEY"
+        )
 
     enabled_entity_list = [item.upper() for item in args.enabled_entities]
 
