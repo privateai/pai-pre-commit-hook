@@ -8,24 +8,25 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 
-def get_payload(content, enabled_entity_list):
-    if len(enabled_entity_list) == 0:
-        payload = {
-            "text": content,
-            "link_batch": True,
-            "entity_detection": {
-                "accuracy": "high",
-            },
-        }
-    else:
-        payload = {
-            "text": content,
-            "link_batch": True,
-            "entity_detection": {
-                "accuracy": "high",
-                "entity_types": [{"type": "ENABLE", "value": enabled_entity_list}],
-            },
-        }
+def get_payload(content, enabled_entity_list, blocked_list):
+    payload = {
+        "text": content,
+        "link_batch": True,
+        "entity_detection": {
+            "accuracy": "high",
+        },
+    }
+    
+    if enabled_entity_list:
+        payload["entity_detection"]["entity_types"] = [{"type": "ENABLE", "value": enabled_entity_list}]
+
+    if blocked_list:
+        blocked_list_payload = []
+        for block_pattern in blocked_list:
+            curr_block_item = {"type": "BLOCK", "value": block_pattern}
+            blocked_list_payload.append(curr_block_item)
+        payload["entity_detection"]["filter"] = blocked_list_payload
+
     return payload
 
 
@@ -50,8 +51,8 @@ def get_flagged_lines(files):
     return flagged
 
 
-def get_response_from_api(content, url, api_key, enabled_entity_list):
-    payload = get_payload(content, enabled_entity_list)
+def get_response_from_api(content, url, api_key, enabled_entity_list, blocked_list):
+    payload = get_payload(content, enabled_entity_list, blocked_list)
     headers = {"Content-Type": "application/json", "X-API-KEY": api_key}
 
     try:
@@ -84,7 +85,7 @@ def locate_pii_in_files(content, files, checked, pii_dict):
                         return number, file
 
 
-def check_for_pii(url, api_key, enabled_entity_list):
+def check_for_pii(url, api_key, enabled_entity_list, blocked_list):
     modified_content = subprocess.getstatusoutput(
         "git diff --cached . ':(exclude)pii-check-hook.py' ':(exclude).pre-commit-config.yaml' ':(exclude)README.md'"
     )[1]
@@ -103,7 +104,7 @@ def check_for_pii(url, api_key, enabled_entity_list):
 
     flagged = get_flagged_lines(files)
 
-    pii_result = get_response_from_api(content, url, api_key, enabled_entity_list)
+    pii_result = get_response_from_api(content, url, api_key, enabled_entity_list, blocked_list)
 
     msg = []
     checked = []
@@ -136,6 +137,7 @@ def main():
     parser.add_argument("--url", type=str, required=True)
     parser.add_argument("--env-file-path", type=str, required=True)
     parser.add_argument("--enabled-entities", type=str, nargs="+")
+    parser.add_argument("--blocked-list", type=str, nargs="+")
     args = parser.parse_args()
 
     dotenv_path = Path(os.environ["PWD"], args.env_file_path)
@@ -151,8 +153,14 @@ def main():
         if args.enabled_entities
         else []
     )
+    
+    blocked_list = (
+        [blocked for blocked in args.blocked_list]
+        if args.blocked_list
+        else []
+    )
 
-    check_for_pii(args.url, API_KEY, enabled_entity_list)
+    check_for_pii(args.url, API_KEY, enabled_entity_list, blocked_list)
 
 
 if __name__ == "__main__":
