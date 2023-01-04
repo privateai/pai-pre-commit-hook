@@ -25,7 +25,7 @@ def get_payload(content, enabled_entity_list, blocked_list):
         for block_pattern in blocked_list:
             curr_block_item = {"type": "BLOCK", "value": block_pattern}
             blocked_list_payload.append(curr_block_item)
-        payload["filter"] = blocked_list_payload
+        payload["entity_detection"]["filter"] = blocked_list_payload
 
     return payload
 
