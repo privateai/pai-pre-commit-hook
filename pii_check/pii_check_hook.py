@@ -29,10 +29,7 @@ def get_flagged_lines(files):
                 lines = fp.readlines()
                 start_flag = False
                 for number, line in enumerate(lines, 1):
-                    if (
-                        "PII_CHECK:OFF" in line.replace(" ", "").strip()
-                        and not start_flag
-                    ):
+                    if "PII_CHECK:OFF" in line.replace(" ", "").strip() and not start_flag:
                         start = number
                         start_flag = True
                     if "PII_CHECK:ON" in line.replace(" ", "").strip() and start_flag:
@@ -148,9 +145,7 @@ def main():
     if "API_KEY" in os.environ:
         API_KEY = os.environ["API_KEY"]
     else:
-        sys.exit(
-            "Your .env file is missing from the provided path or does not contain API_KEY"
-        )
+        sys.exit("Your .env file is missing from the provided path or does not contain API_KEY")
 
     enabled_entity_list = [item.upper() for item in args.enabled_entities]
 
