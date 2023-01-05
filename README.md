@@ -29,9 +29,6 @@ repos:
             "URL",
             "--env-file-path",
             "ENV_FILE_PATH",
-            "--enabled-entities",
-            "ENTITY-1",
-            "ENTITY-2",
           ]
         verbose: true
 
@@ -42,17 +39,47 @@ repos:
 6. Create a .env file and add your API_KEY like so:\
     API_KEY=`<put your API KEY here>`
 7. Replace 'ENV_FILE_PATH' with the path to your .env file.
-8. If you wish to add the optional argument --enabled-entities replace 'ENTITY-1', 'ENTITY-2' with the entities you wish to mark as PII
-    (Recommended to add this argument currently)\
-    You may add any entities from the following list: https://docs.private-ai.com/entities/ 
-   If you choose not to provide this option, all entities will be enabled by default. 
-  
-  
+
 That's it! You're all set for safe commits!
+
+## Additional Configuration (Optional)
+1. If you want to treat only certain entities as PII, while ignoring others you can add the optional argument ```--enabled-entities``` followed by the entities you wish to mark as PII.
+    (Recommended to add this argument currently)\
+2. If you want to detect all entities except a few, you can provide the optional argument ```--blocked-list``` followed by the entities you do NOT wish to be marked as PII.
+
+For both these configurations, you may add any entities from the following list: https://docs.private-ai.com/entities/ 
+  
+## Sample '.pre-commit-config.yaml'
+After these configurations, **an example** of what your pre-commit-config.yaml may look like:
+
+```
+repos:
+  - repo: https://github.com/privateai/pai-pre-commit-hook.git
+    rev: v1.2-beta
+    hooks:
+      - id: pii-check
+        args:
+          [
+            "--url",
+            "http://localhost:8080/v3/process_text",
+            "--env-file-path",
+            ".env",
+            "--enabled-entities",
+            "PASSWORD",
+            "ORGANIZATION",
+            --blocked-list,
+            "NAME",
+            "LOCATION"
+          ]
+        verbose: true
+
+```
+  
+
 
 ## Sample Project 
 
-After the above steps your project structure should look like this:
+After the above steps, **an example** of what your project structure would be like:
 ```
 (base) ketakigokhale@Ketakis-MacBook-Pro sample-project % tree -a
 .
