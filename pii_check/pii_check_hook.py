@@ -16,7 +16,7 @@ def get_payload(content, enabled_entity_list, blocked_list):
             "accuracy": "high",
         },
     }
-    
+
     if enabled_entity_list:
         payload["entity_detection"]["entity_types"] = [{"type": "ENABLE", "value": enabled_entity_list}]
 
@@ -38,10 +38,7 @@ def get_flagged_lines(files):
                 lines = fp.readlines()
                 start_flag = False
                 for number, line in enumerate(lines, 1):
-                    if (
-                        "PII_CHECK:OFF" in line.replace(" ", "").strip()
-                        and not start_flag
-                    ):
+                    if "PII_CHECK:OFF" in line.replace(" ", "").strip() and not start_flag:
                         start = number
                         start_flag = True
                     if "PII_CHECK:ON" in line.replace(" ", "").strip() and start_flag:
@@ -136,7 +133,19 @@ def main():
     parser = argparse.ArgumentParser(description="pre-commit hook to check for PII")
     parser.add_argument("--url", type=str, required=True)
     parser.add_argument("--env-file-path", type=str, required=True)
-    parser.add_argument("--enabled-entities", type=str, nargs="+")
+    parser.add_argument(
+        "--enabled-entities",
+        type=str,
+        nargs="+",
+        default=[
+            "PASSWORD",
+            "BANK_ACCOUNT",
+            "CREDIT_CARD",
+            "CREDIT_CARD_EXPIRATION",
+            "CVV",
+            "ROUTING_NUMBER",
+        ],
+    )
     parser.add_argument("--blocked-list", type=str, nargs="+")
     args = parser.parse_args()
 
@@ -146,19 +155,11 @@ def main():
     if "API_KEY" in os.environ:
         API_KEY = os.environ["API_KEY"]
     else:
-        sys.exit("Your .env file is missing or does not contain API_KEY")
+        sys.exit("Your .env file is missing from the provided path or does not contain API_KEY")
 
-    enabled_entity_list = (
-        [item.upper() for item in args.enabled_entities]
-        if args.enabled_entities
-        else []
-    )
-    
-    blocked_list = (
-        [blocked for blocked in args.blocked_list]
-        if args.blocked_list
-        else []
-    )
+    enabled_entity_list = [item.upper() for item in args.enabled_entities]
+
+    blocked_list = [blocked for blocked in args.blocked_list] if args.blocked_list else []
 
     check_for_pii(args.url, API_KEY, enabled_entity_list, blocked_list)
 
