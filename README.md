@@ -2,7 +2,7 @@
 
 A pre-commit hook to check for PII in your code. The hook is configured in each repository you would like to scan for PII and runs automatically every time you commit to your repo. It will check for PII in all staged files.
 
-Note that PII detection isn't done locally, instead any files part of the commit are sent via a POST request, to a self-hosted instance of Private AI's PII detection container.
+Note that PII detection isn't done locally, instead any files part of the commit are sent via a POST request to a self-hosted instance of Private AI's PII detection engine.
 
 This integration only works with the 3.0 version of Private AI's container.
 
