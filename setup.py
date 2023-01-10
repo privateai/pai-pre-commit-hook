@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = "1.1"
+VERSION = "1.2.1"
 DESCRIPTION = "Pre-commit hook to check if modified files have PII and marks it."
 
 
