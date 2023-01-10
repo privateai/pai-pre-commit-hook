@@ -23,7 +23,7 @@ def get_payload(content, enabled_entity_list, blocked_list):
     if blocked_list:
         blocked_list_payload = []
         if (blocked_list % 2) != 0:
-            sys.exit("Uneven number of blocked list parameters. Please provide parameters as 'ENTITY TYPE' - 'PATTERN' pairs in config")
+            sys.exit("Uneven number of blocked list parameters. Please provide parameters as space-separated 'ENTITY TYPE' 'PATTERN' pairs in config")
             
         type_pattern_pairs = [blocked_list[i:i + 2] for i in range(0, len(blocked_list), 2)]
         for entity_type, block_pattern in type_pattern_pairs:
