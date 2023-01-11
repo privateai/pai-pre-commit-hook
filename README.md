@@ -34,7 +34,7 @@ This integration requires an endpoint to make requests against. For instructions
     ```
 
 1. Replace `<URL>` with the url of where your container is hosted.\
-     eg. [http://localhost:8080/v3/process_text](http://localhost:8080/v3/process_text) for a container running locally.
+     eg. [http://localhost:8080/v3/process/text](http://localhost:8080/v3/process_text) for a container running locally.
 1. Create a .env file and add your API_KEY like so:\
     API_KEY=`<put your API KEY here>`
 1. Replace `<ENV_FILE_PATH>` with the path to your .env file.
