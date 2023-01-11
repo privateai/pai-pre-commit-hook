@@ -65,7 +65,7 @@ Here is an example of what your pre-commit-config.yaml may look like:
 ``` yaml
 repos:
   - repo: https://github.com/privateai/pai-pre-commit-hook.git
-    rev: v1.2-beta
+    rev: v1.2.1-beta
     hooks:
       - id: pii-check
         args:
