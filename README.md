@@ -71,7 +71,7 @@ repos:
         args:
           [
             "--url",
-            "http://localhost:8080/v3/process/text",
+            "http://localhost:8080/v3/process_text",
             "--env-file-path",
             ".env",
             "--enabled-entities",
