@@ -37,7 +37,7 @@ def get_payload(content, enabled_entity_list, blocked_list):
 def get_flagged_lines(files):
     flagged = []
     for file in files:
-        if os.path.exists(file):
+        if os.path.exists(file) and not os.path.isdir(file):
             with open(file, "r") as fp:
                 lines = fp.readlines()
                 start_flag = False
