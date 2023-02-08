@@ -37,7 +37,7 @@ def get_payload(content, enabled_entity_list, blocked_list):
 def get_flagged_lines(files):
     flagged = []
     for file in files:
-        if os.path.exists(file):
+        if os.path.exists(file) and not os.path.isdir(file):
             with open(file, "r") as fp:
                 lines = fp.readlines()
                 start_flag = False
@@ -77,8 +77,8 @@ def locate_pii_in_files(content, files, checked, pii_dict):
                 for number, line in enumerate(lines, 1):
                     if content in line:
                         if (
-                            pii_dict["stt_idx"],
-                            pii_dict["end_idx"],
+                            pii_dict["location"]["stt_idx"],
+                            pii_dict["location"]["end_idx"],
                             number,
                             file,
                         ) in checked:
@@ -115,7 +115,7 @@ def check_for_pii(url, api_key, enabled_entity_list, blocked_list):
             continue
         for pii_dict in item["entities"]:
             line, file = locate_pii_in_files(content, files, checked, pii_dict)
-            checked.append((pii_dict["stt_idx"], pii_dict["end_idx"], line, file))
+            checked.append((pii_dict["location"]["stt_idx"], pii_dict["location"]["end_idx"], line, file))
             skip = False
             for item in flagged:
                 if line > item[0] and line < item[1] and file == item[2]:
@@ -123,8 +123,8 @@ def check_for_pii(url, api_key, enabled_entity_list, blocked_list):
                     break
             if skip == False:
                 msg.append(
-                    f"PII found - type: {pii_dict['best_label']}, line number: {line}, file: {file}, start index: {pii_dict['stt_idx'] + 1}, end "
-                    f"index: {pii_dict['end_idx'] + 1} "
+                    f"PII found - type: {pii_dict['best_label']}, line number: {line}, file: {file}, start index: {pii_dict['location']['stt_idx'] + 1}, end "
+                    f"index: {pii_dict['location']['end_idx'] + 1} "
                 )
 
     if not msg:
