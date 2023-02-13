@@ -1,0 +1,10 @@
+Some content in between the flags. Ideally this content won't be checked for PII.
+Below is a dummy PII to check this
+Credit card number: 1234 5678 9101 1123
+CVV: 123
+PII_CHECK:ON
+
+PII_CHECK:OFF
+Some content where the check will be performed.
+Credit card number: 1234 5678 9101 1123
+CVV: 123
