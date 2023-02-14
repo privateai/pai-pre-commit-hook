@@ -12,7 +12,7 @@ from pii_check.pii_check_hook import get_ignored_lines
         ("tests/test_data/dir_with_files/file_with_mismatch_pii_flags", set()),
     ],
 )
-def test_get_flagged_lines(filename, expected):
+def test_get_ignored_lines(filename, expected):
     import os
 
     print(f"CWD {os.getcwd()}")
