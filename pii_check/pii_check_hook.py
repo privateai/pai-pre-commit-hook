@@ -3,11 +3,14 @@ import os
 import subprocess
 import sys
 from enum import Enum
+from io import StringIO
+from itertools import chain
 from pathlib import Path
-from typing import Any, Dict, List, Set
+from typing import List, Set
 
 import requests
 from dotenv import load_dotenv
+from unidiff import Hunk, PatchSet
 
 
 def get_payload(content: List[str], enabled_entity_list, blocked_list):
@@ -67,19 +70,7 @@ def get_response_from_api(content, url, api_key, enabled_entity_list, blocked_li
     return response.json()
 
 
-def locate_pii_in_file(content: str, file: str, checked: List[str], pii_dict: Dict[str, Any]) -> int:
-
-    with open(file, "r") as fp:
-        lines = fp.readlines()
-
-    for line_number, line in enumerate(lines, 1):
-        if content in line:
-            if (pii_dict["location"]["stt_idx"], pii_dict["location"]["end_idx"], line_number) in checked:
-                continue
-            return line_number
-
-
-def get_diff_content(filename: str) -> List[str]:
+def get_diff(filename: str) -> PatchSet:
     """Returns the changes made to a file. The files to check are
     determine by pre-commit. When running `pre-commit run -a`, files with no staged changes are being processed which will end-up in empty diff content. This is handled outside this function.
 
@@ -87,7 +78,7 @@ def get_diff_content(filename: str) -> List[str]:
     :return: the content to check
     """
     diff = subprocess.getstatusoutput(f"git diff --cached {filename}")[1]
-    return [line[1:] for line in diff.split("\n") if line.startswith("+") and not line.startswith("+++")]
+    return PatchSet(StringIO(diff))
 
 
 class PiiStatus(str, Enum):
@@ -96,25 +87,32 @@ class PiiStatus(str, Enum):
     EMPTY_DIFF = "EMPTY_DIFF"
 
 
+def get_added_text(hunk: Hunk) -> str:
+    "Returns the text added by a diff hunk"
+    return "".join([line.value for line in hunk if line.is_added])
+
+
 def check_for_pii(filename: str, url: str, api_key: str, enabled_entity_list: List[str], blocked_list: List[str]) -> PiiStatus:
 
     if not os.path.getsize(filename):
         # dont't expect PII in empty files
         return PiiStatus.NO_PII_FOUND
 
-    content = get_diff_content(filename)
-    if not content:
+    diff = get_diff(filename)
+    if not diff:
         return PiiStatus.EMPTY_DIFF
 
-    pii_results = get_response_from_api(content, url, api_key, enabled_entity_list, blocked_list)
+    # we are only interested in new incoming text whether it modifies existing text or it is being added
+    hunks = [hunk for file in chain(diff.modified_files, diff.added_files) for hunk in file]
+    added_text = [get_added_text(hunk) for hunk in hunks]
+
+    pii_results = get_response_from_api(added_text, url, api_key, enabled_entity_list, blocked_list)
     ignored_lines = get_ignored_lines(filename)
-    checked = []
 
     pii_status = PiiStatus.NO_PII_FOUND
-    for content, pii_result in zip(content, pii_results):
+    for hunk, pii_result in zip(hunks, pii_results):
         for pii_dict in pii_result["entities"]:
-            line_number = locate_pii_in_file(content, filename, checked, pii_dict)
-            checked.append((pii_dict["location"]["stt_idx"], pii_dict["location"]["end_idx"], line_number))
+            line_number = hunk.target_start + len(get_added_text(hunk)[: pii_dict["location"]["stt_idx"]].split("\n"))
             if line_number not in ignored_lines:
                 pii_status = PiiStatus.PII_FOUND
                 print(
