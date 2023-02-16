@@ -2,11 +2,11 @@ import argparse
 import os
 import subprocess
 import sys
-from enum import Enum
+from dataclasses import dataclass
 from io import StringIO
 from itertools import chain
 from pathlib import Path
-from typing import List, Set
+from typing import Any, Dict, List, Set, Tuple
 
 import requests
 from dotenv import load_dotenv
@@ -81,46 +81,57 @@ def get_diff(filename: str) -> PatchSet:
     return PatchSet(StringIO(diff))
 
 
-class PiiStatus(str, Enum):
-    PII_FOUND = "PII_FOUND"
-    NO_PII_FOUND = "NO_PII_FOUND"
-    EMPTY_DIFF = "EMPTY_DIFF"
+def get_line_offset(hunk: Hunk, pii_entity: Dict[str, Any]) -> Tuple[int, int, int]:
+    """Convert hunk line and start index for an entity into file line and offset
+
+    :param hunk: the hunk in which the entity was found
+    :param int: the entity information
+
+    Returns a pair of integers (line number, entity start index in line, entity length)
+    """
+    lines_before_entity = "".join(hunk.target)[: pii_entity["location"]["stt_idx"]].split("\n")
+    line_number = hunk.target_start + len(lines_before_entity) - 1
+    entity_start_index = len(lines_before_entity[-1])
+    entity_length = pii_entity["location"]["end_idx"] - pii_entity["location"]["stt_idx"]
+
+    return line_number, entity_start_index, entity_length
 
 
-def get_added_text(hunk: Hunk) -> str:
-    "Returns the text added by a diff hunk"
-    return "".join([line.value for line in hunk if line.is_added])
+@dataclass
+class PiiResult:
+    filename: str
+    line: int
+    start_index: int
+    entity_length: int
+    entity_type: str
 
 
-def check_for_pii(filename: str, url: str, api_key: str, enabled_entity_list: List[str], blocked_list: List[str]) -> PiiStatus:
+def check_for_pii(filename: str, url: str, api_key: str, enabled_entity_list: List[str], blocked_list: List[str]) -> List[PiiResult]:
 
     if not os.path.getsize(filename):
         # dont't expect PII in empty files
-        return PiiStatus.NO_PII_FOUND
+        return []
 
     diff = get_diff(filename)
     if not diff:
-        return PiiStatus.EMPTY_DIFF
+        raise RuntimeError(f'Running on file "{filename}" with no diff is not supported.')
 
     # we are only interested in new incoming text whether it modifies existing text or it is being added
     hunks = [hunk for file in chain(diff.modified_files, diff.added_files) for hunk in file]
-    added_text = [get_added_text(hunk) for hunk in hunks]
+    # this contains also context around the added lines
+    added_text = ["".join(hunk.target) for hunk in hunks]
 
-    pii_results = get_response_from_api(added_text, url, api_key, enabled_entity_list, blocked_list)
+    api_pii_results = get_response_from_api(added_text, url, api_key, enabled_entity_list, blocked_list)
     ignored_lines = get_ignored_lines(filename)
 
-    pii_status = PiiStatus.NO_PII_FOUND
-    for hunk, pii_result in zip(hunks, pii_results):
-        for pii_dict in pii_result["entities"]:
-            line_number = hunk.target_start + len(get_added_text(hunk)[: pii_dict["location"]["stt_idx"]].split("\n"))
+    pii_results: List[PiiResult] = []
+    for hunk, api_pii_result in zip(hunks, api_pii_results):
+        for pii_dict in api_pii_result["entities"]:
+            line_number, start_index, entity_length = get_line_offset(hunk, pii_dict)
             if line_number not in ignored_lines:
-                pii_status = PiiStatus.PII_FOUND
-                print(
-                    f"PII found - type: {pii_dict['best_label']}, line number: {line_number}, file: {filename}, start index: {pii_dict['location']['stt_idx'] + 1}, end "
-                    f"index: {pii_dict['location']['end_idx'] + 1} "
-                )
+                pii_results.append(PiiResult(filename, line_number, start_index, entity_length, pii_dict["best_label"]))
 
-    return pii_status
+    return pii_results
 
 
 def main():
@@ -156,23 +167,27 @@ def main():
 
     blocked_list = [blocked for blocked in args.blocked_list] if args.blocked_list else []
 
-    file_status = {filename: check_for_pii(filename, args.url, API_KEY, enabled_entity_list, blocked_list) for filename in args.filenames}
+    try:
+        pii_results = [
+            result
+            for filename in args.filenames
+            for result in check_for_pii(os.path.abspath(filename), args.url, API_KEY, enabled_entity_list, blocked_list)
+        ]
+    except RuntimeError as e:
+        print(e)
+        print("If you get this message when running `pre-commit run -a` make sure to scan the files manually for PII instead of using this hook.")
+        return 2
 
-    # Fail the PII check when we skip a file as this file may be containing PII
-    # This is the case for example when this hook is triggered via `pre-commit run -a`.
-    warn_pii_found = any(status != PiiStatus.NO_PII_FOUND for status in file_status.values())
-
-    for filename, status in file_status.items():
-        if status == PiiStatus.EMPTY_DIFF:
+    if pii_results:
+        for result in pii_results:
             print(
-                f"No changes were made to file {filename}.\n The file was skipped! If you get this message when running `pre-commit run -a` make sure to scan the files manually for PII instead of using this hook."
+                f"""Found PII [{result.entity_type}]: File "{result.filename}", line {result.line}, at index {result.start_index}:{result.start_index+ result.entity_length}"""
             )
 
-    if warn_pii_found:
         print("Review the above problems before committing the changes.")
         return 1
     else:
-        print(f"Scanned {len(file_status)} file(s) and found no PII :)")
+        print(f"Scanned {len(args.filenames)} file(s) and found no PII :)")
         return 0
 
 
