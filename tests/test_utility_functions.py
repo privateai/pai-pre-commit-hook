@@ -13,8 +13,5 @@ from pii_check.pii_check_hook import get_ignored_lines
     ],
 )
 def test_get_ignored_lines(filename, expected):
-    import os
-
-    print(f"CWD {os.getcwd()}")
     res = get_ignored_lines(filename)
     assert res == expected
