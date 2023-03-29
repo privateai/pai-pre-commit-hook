@@ -61,9 +61,9 @@ def get_ignored_lines(filename: str) -> Set[int]:
     return ignored_lines
 
 
-def get_response_from_api(content, url, api_key, enabled_entity_list, blocked_list):
+def get_response_from_api(content, url, enabled_entity_list, blocked_list):
     payload = get_payload(content, enabled_entity_list, blocked_list)
-    headers = {"Content-Type": "application/json", "X-API-KEY": api_key}
+    headers = {"Content-Type": "application/json"}
 
     response = requests.post(url, json=payload, headers=headers)
     response.raise_for_status()
@@ -106,7 +106,7 @@ class PiiResult:
     entity_type: str
 
 
-def check_for_pii(filename: str, url: str, api_key: str, enabled_entity_list: List[str], blocked_list: List[str]) -> List[PiiResult]:
+def check_for_pii(filename: str, url: str, enabled_entity_list: List[str], blocked_list: List[str]) -> List[PiiResult]:
 
     if not os.path.getsize(filename):
         # dont't expect PII in empty files
@@ -121,7 +121,7 @@ def check_for_pii(filename: str, url: str, api_key: str, enabled_entity_list: Li
     # this contains also context around the added lines
     added_text = ["".join(hunk.target) for hunk in hunks]
 
-    api_pii_results = get_response_from_api(added_text, url, api_key, enabled_entity_list, blocked_list)
+    api_pii_results = get_response_from_api(added_text, url, enabled_entity_list, blocked_list)
     ignored_lines = get_ignored_lines(filename)
 
     pii_results: List[PiiResult] = []
@@ -158,11 +158,6 @@ def main():
     dotenv_path = Path(os.environ["PWD"], args.env_file_path)
     load_dotenv(dotenv_path=dotenv_path)
 
-    if "API_KEY" in os.environ:
-        API_KEY = os.environ["API_KEY"]
-    else:
-        sys.exit("Your .env file is missing from the provided path or does not contain API_KEY")
-
     enabled_entity_list = [item.upper() for item in args.enabled_entities]
 
     blocked_list = [blocked for blocked in args.blocked_list] if args.blocked_list else []
@@ -171,7 +166,7 @@ def main():
         pii_results = [
             result
             for filename in args.filenames
-            for result in check_for_pii(os.path.abspath(filename), args.url, API_KEY, enabled_entity_list, blocked_list)
+            for result in check_for_pii(os.path.abspath(filename), args.url, enabled_entity_list, blocked_list)
         ]
     except RuntimeError as e:
         print(e)
