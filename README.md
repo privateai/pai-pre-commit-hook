@@ -19,7 +19,7 @@ This integration requires an endpoint to make requests against. For instructions
     ``` yaml
     repos:
       - repo: https://github.com/privateai/pai-pre-commit-hook.git
-        rev: v1.2.1-beta
+        rev: v1.3.0
         hooks:
           - id: pii-check
             args:
@@ -35,9 +35,7 @@ This integration requires an endpoint to make requests against. For instructions
 
 1. Replace `<URL>` with the url of where your container is hosted.\
      eg. [http://localhost:8080/v3/process_text](http://localhost:8080/v3/process_text) for a container running locally.
-1. Create a .env file and add your API_KEY like so:\
-    API_KEY=`<put your API KEY here>`
-1. Replace `<ENV_FILE_PATH>` with the path to your .env file.
+
 1. Run 'pre-commit install' from inside the git repo where you want to use this hook.
 
 After the above steps, your project structure should look somewhat like:
@@ -65,7 +63,7 @@ Here is an example of what your pre-commit-config.yaml may look like:
 ``` yaml
 repos:
   - repo: https://github.com/privateai/pai-pre-commit-hook.git
-    rev: v1.2.1-beta
+    rev: v1.3.0
     hooks:
       - id: pii-check
         args:
