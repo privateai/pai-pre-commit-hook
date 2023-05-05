@@ -137,6 +137,7 @@ def check_for_pii(filename: str, url: str, enabled_entity_list: List[str], block
 def main():
     parser = argparse.ArgumentParser(description="pre-commit hook to check for PII")
     parser.add_argument("filenames", nargs="*")
+    parser.add_argument("--url", type=str, required=True)
     parser.add_argument("--env-file-path", type=str)
     parser.add_argument(
         "--enabled-entities",
@@ -152,7 +153,6 @@ def main():
         ],
     )
     parser.add_argument("--blocked-list", type=str, nargs="+")
-    parser.add_argument("--url", type=str, required=True)
     args = parser.parse_args()
 
     # dotenv_path = Path(os.environ["PWD"], args.env_file_path)
@@ -164,7 +164,9 @@ def main():
 
     try:
         pii_results = [
-            result for filename in args.filenames for result in check_for_pii(os.path.abspath(filename), args.url, enabled_entity_list, blocked_list)
+            result
+            for filename in args.filenames
+            for result in check_for_pii(os.path.abspath(filename), args.url, enabled_entity_list, blocked_list)
         ]
     except RuntimeError as e:
         print(e)

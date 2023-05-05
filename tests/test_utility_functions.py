@@ -1,5 +1,5 @@
 import pytest
-from pii_check.pii_check_hook import get_diff, get_ignored_lines
+from pii_check.pii_check_hook import get_ignored_lines
 
 
 @pytest.mark.parametrize(
