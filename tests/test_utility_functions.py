@@ -1,5 +1,4 @@
 import pytest
-
 from pii_check.pii_check_hook import get_ignored_lines
 
 
