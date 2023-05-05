@@ -77,7 +77,7 @@ def get_diff(filename: str) -> PatchSet:
     :param filename: a filename
     :return: the content to check
     """
-    diff = subprocess.getstatusoutput(f"git diff --cached {filename}")[1]
+    diff = subprocess.getstatusoutput(f"git diff --cached '{filename}'")[1]
     return PatchSet(StringIO(diff))
 
 
