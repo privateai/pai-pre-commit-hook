@@ -1,8 +1,5 @@
-import random
-import string
-
 import pytest
-from pii_check.pii_check_hook import get_ignored_lines
+from pii_check.pii_check_hook import get_diff, get_ignored_lines
 
 
 @pytest.mark.parametrize(
@@ -17,8 +14,3 @@ from pii_check.pii_check_hook import get_ignored_lines
 def test_get_ignored_lines(filename, expected):
     res = get_ignored_lines(filename)
     assert res == expected
-
-
-def test_get_diff():
-    with open("tests/test_data/dir_with_files/file with spaces in name.txt", "w") as fout:
-        fout.write("".join(random.choice(string.ascii_lowercase) for i in range(random.randint(50,100))))
