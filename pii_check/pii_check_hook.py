@@ -138,7 +138,7 @@ def main():
     parser = argparse.ArgumentParser(description="pre-commit hook to check for PII")
     parser.add_argument("filenames", nargs="*")
     parser.add_argument("--url", type=str, required=True)
-    parser.add_argument("--env-file-path", type=str, required=True)
+    parser.add_argument("--env-file-path", type=str)
     parser.add_argument(
         "--enabled-entities",
         type=str,
