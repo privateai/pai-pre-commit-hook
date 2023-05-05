@@ -155,8 +155,8 @@ def main():
     parser.add_argument("--blocked-list", type=str, nargs="+")
     args = parser.parse_args()
 
-    dotenv_path = Path(os.environ["PWD"], args.env_file_path)
-    load_dotenv(dotenv_path=dotenv_path)
+    # dotenv_path = Path(os.environ["PWD"], args.env_file_path)
+    # load_dotenv(dotenv_path=dotenv_path)
 
     enabled_entity_list = [item.upper() for item in args.enabled_entities]
 
